@@ -1,0 +1,39 @@
+#!/bin/sh
+
+if [ -x $1 ]; then
+    echo "$0 <rootfs.ubi>"
+    exit 1
+fi
+
+UPDATE_ROOT=/tmp/update-root
+
+echo
+echo -n "Preparing updater chroot ... "
+
+mkdir -p ${UPDATE_ROOT}/usr
+mkdir -p ${UPDATE_ROOT}/dev
+mkdir -p ${UPDATE_ROOT}/proc
+cp -a /bin /lib /sbin $UPDATE_ROOT
+cp -a /usr/bin /usr/lib /usr/sbin ${UPDATE_ROOT}/usr
+
+mount -t devtmpfs none ${UPDATE_ROOT}/dev
+mount -t proc none ${UPDATE_ROOT}/proc
+
+cp $1 $UPDATE_ROOT
+
+cat > ${UPDATE_ROOT}/update-rootfs << EOF
+#!/bin/sh
+ubiformat /dev/mtd2 -f rootfs.ubi
+sync
+reboot -f
+EOF
+
+chmod 755 ${UPDATE_ROOT}/update-rootfs
+
+mount -o remount,ro /
+
+echo "done"
+echo "Write system image..."
+echo
+
+chroot $UPDATE_ROOT /update-rootfs
