@@ -1,0 +1,7 @@
+config BR2_PACKAGE_ORANGEPI_H2_EXTERNAL
+	bool "xradio-wlan-firmware"
+	depends on BR2_arm
+	help
+	  Firmware for H2+ SoC xradio wireless module.
+
+	  https://github.com/orangepi-xunlong/OrangePiH2_external

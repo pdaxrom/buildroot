@@ -1,0 +1,28 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+  pre-up /etc/network/nfs_check
+  wait-delay 15
+
+auto br0
+iface br0 inet static
+  address 192.168.2.1
+  netmask 255.255.255.0
+  network 192.168.2.0
+  broadcast 192.168.2.255
+  pre-up ifconfig wlan0 down
+  pre-up start-stop-daemon -S -p /run/hostapd.pid -x /usr/sbin/hostapd -- -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+#  hostapd already create bridge and add and up network interface
+#  pre-up brctl addbr br0
+#  pre-up brctl addif br0 wlan0
+#  pre-up ifconfig wlan0 up
+# hostapd down and remove network interface from bridge and remove bridge
+  post-down start-stop-daemon -K -q -p /run/hostapd.pid
+#  post-down ifconfig wlan0 down
+#  post-down brctl delif br0 wlan0
+#  post-down brctl delbr br0
+
+auto wlan0
+iface wlan0 inet manual

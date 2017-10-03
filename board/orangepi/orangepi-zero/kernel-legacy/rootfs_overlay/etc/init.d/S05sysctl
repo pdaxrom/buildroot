@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+
+load_conf()
+{
+	for file in $(ls /etc/sysctl.d/*.conf 2>/dev/null); do
+		sysctl -p $file
+	done
+}
+
+case "$1" in
+	start)
+		load_conf
+		;;
+	stop)
+		;;
+	restart|reload)
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+
+load_drivers()
+{
+	cat /etc/modules-load.d/*.conf | while IFS= read -r line; do
+		modprobe $line
+	done
+}
+
+case "$1" in
+	start)
+		load_drivers
+		;;
+	stop)
+		;;
+	restart|reload)
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

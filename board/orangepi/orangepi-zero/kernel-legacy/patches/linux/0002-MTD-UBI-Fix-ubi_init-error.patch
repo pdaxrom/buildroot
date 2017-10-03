@@ -1,0 +1,11 @@
+--- a/drivers/mtd/ubi/build.c	2017-09-29 16:35:04.413323477 +0400
++++ b/drivers/mtd/ubi/build.c	2017-09-29 16:35:17.673701013 +0400
+@@ -1280,7 +1280,7 @@
+ 	ubi_err("UBI error: cannot initialize UBI, error %d", err);
+ 	return err;
+ }
+-module_init(ubi_init);
++late_initcall(ubi_init);
+ 
+ static void __exit ubi_exit(void)
+ {
