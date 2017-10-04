@@ -111,6 +111,13 @@ else
 SDL2_CONF_OPTS += --disable-video-opengles
 endif
 
+ifeq ($(BR2_PACKAGE_SDL2_VIDEO_MALI),y)
+SDL2_CONF_OPTS += --enable-video-mali
+SDL2_DEPENDENCIES += libgles
+else
+SDL2_CONF_OPTS += --disable-video-mali
+endif
+
 ifeq ($(BR2_PACKAGE_TSLIB),y)
 SDL2_DEPENDENCIES += tslib
 SDL2_CONF_OPTS += --enable-input-tslib
