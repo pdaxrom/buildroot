@@ -1,0 +1,14 @@
+config BR2_PACKAGE_PYLDIN601
+	bool "pyldin-601"
+	depends on !BR2_STATIC_LIBS # sdl2
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_SDL2
+	select BR2_PACKAGE_SDL2_IMAGE
+	select BR2_PACKAGE_ZLIB
+	help
+	  pyldin-601 is a multi-platform Pyldin-601 emulator.
+
+	  https://github.com/pdaxrom/pyldin601
+
+comment "pyldin 601 needs a toolchain w/ dynamic library, threads"
+	depends on BR2_STATIC_LIBS || !BR2_TOOLCHAIN_HAS_THREADS
