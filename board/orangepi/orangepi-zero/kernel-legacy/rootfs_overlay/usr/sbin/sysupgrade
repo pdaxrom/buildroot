@@ -23,7 +23,8 @@ cp $1 $UPDATE_ROOT
 
 cat > ${UPDATE_ROOT}/update-rootfs << EOF
 #!/bin/sh
-ubiformat /dev/mtd2 -f rootfs.ubi
+#ubiformat /dev/mtd2 -f rootfs.ubi
+flashcp -v rootfs.squashfs /dev/mtd4
 sync
 reboot -f
 EOF

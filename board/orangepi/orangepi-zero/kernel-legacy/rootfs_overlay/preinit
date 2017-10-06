@@ -1,0 +1,21 @@
+#!/bin/sh
+
+UBIMTD=/dev/mtd5
+UBIPART=/dev/ubi0
+UBIDEV=${UBIPART}_0
+
+if [ ! -e $UBIDEV ]; then
+	ubiformat $UBIMTD
+	ubiattach -p $UBIMTD
+	ubimkvol $UBIPART -m -N overlay
+fi
+
+mount -t ubifs $UBIDEV /overlay
+#mount -t tmpfs none /overlay
+mount -t overlayfs -o lowerdir=/,upperdir=/overlay overlayfs /rootfs_rw
+
+cd /rootfs_rw
+mount --bind /dev dev
+pivot_root . rootfs_ro
+exec chroot . /sbin/init
+/bin/sh

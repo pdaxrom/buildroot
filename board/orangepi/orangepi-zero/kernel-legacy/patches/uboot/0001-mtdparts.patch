@@ -1,0 +1,21 @@
+diff -Nur uboot-sunxi-spi-mtd/include/configs/sunxi-common.h uboot-sunxi-spi-mtd-new/include/configs/sunxi-common.h
+--- uboot-sunxi-spi-mtd/include/configs/sunxi-common.h	2017-09-29 11:46:34.000000000 +0400
++++ uboot-sunxi-spi-mtd-new/include/configs/sunxi-common.h	2017-10-05 15:52:26.890974786 +0400
+@@ -507,10 +507,13 @@
+ #endif
+ 
+ #define MTDIDS_DEFAULT			"nor0=spi-flash0.0"
+-#define MTDPARTS_DEFAULT		"mtdparts=spi-flash0.0:" \
+-					"640k(u-boot)," \
+-					"128k(u-boot-env)," \
+-					"-(rootfs)"
++#define MTDPARTS_DEFAULT		"mtdparts=spi-flash0.0:"	\
++					"640k(u-boot),"			\
++					"128k(u-boot-env),"		\
++					"4096k(kernel),"		\
++					"128k(script),"			\
++					"24576k(rootfs),"		\
++					"-(overlay)"
+ 
+ /*
+  * File system
