@@ -19,6 +19,8 @@ iface br0 inet static
 #  pre-up brctl addif br0 wlan0
 #  pre-up ifconfig wlan0 up
 # hostapd down and remove network interface from bridge and remove bridge
+   pre-up brctl addif br0 usb0
+   pre-up ifconfig usb0 up
   post-down start-stop-daemon -K -q -p /run/hostapd.pid
 #  post-down ifconfig wlan0 down
 #  post-down brctl delif br0 wlan0
@@ -26,3 +28,6 @@ iface br0 inet static
 
 auto wlan0
 iface wlan0 inet manual
+
+auto usb0
+iface usb0 inet manual

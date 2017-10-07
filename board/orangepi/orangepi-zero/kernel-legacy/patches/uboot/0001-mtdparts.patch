@@ -1,7 +1,32 @@
 diff -Nur uboot-sunxi-spi-mtd/include/configs/sunxi-common.h uboot-sunxi-spi-mtd-new/include/configs/sunxi-common.h
 --- uboot-sunxi-spi-mtd/include/configs/sunxi-common.h	2017-09-29 11:46:34.000000000 +0400
-+++ uboot-sunxi-spi-mtd-new/include/configs/sunxi-common.h	2017-10-05 15:52:26.890974786 +0400
-@@ -507,10 +507,13 @@
++++ uboot-sunxi-spi-mtd-new/include/configs/sunxi-common.h	2017-10-07 07:52:29.842410676 +0400
+@@ -443,12 +443,24 @@
+ #define BOOTENV_DEV_NAME_FEL(devtypeu, devtypel, instance) \
+ 	"fel "
+ 
++/* SPI boot support, auto-execute boot.scr */
++#define BOOTENV_DEV_SPINOR(devtypeu, devtypel, instance) \
++	"bootcmd_spinor=" \
++		"echo '(SPI NOR boot)'; " \
++		"sf probe; mtdparts; " \
++		"sf read ${scriptaddr} boot 10000; " \
++		"source ${scriptaddr}; " \
++		"\0"
++#define BOOTENV_DEV_NAME_SPINOR(devtypeu, devtypel, instance) \
++	"spinor "
++
+ #define BOOT_TARGET_DEVICES(func) \
+ 	func(FEL, fel, na) \
+ 	BOOT_TARGET_DEVICES_MMC(func) \
+ 	BOOT_TARGET_DEVICES_MMC_EXTRA(func) \
+ 	BOOT_TARGET_DEVICES_SCSI(func) \
+ 	BOOT_TARGET_DEVICES_USB(func) \
++	func(SPINOR, spinor, na) \
+ 	func(PXE, pxe, na) \
+ 	func(DHCP, dhcp, na)
+ 
+@@ -507,10 +519,14 @@
  #endif
  
  #define MTDIDS_DEFAULT			"nor0=spi-flash0.0"
@@ -11,7 +36,8 @@ diff -Nur uboot-sunxi-spi-mtd/include/configs/sunxi-common.h uboot-sunxi-spi-mtd
 -					"-(rootfs)"
 +#define MTDPARTS_DEFAULT		"mtdparts=spi-flash0.0:"	\
 +					"640k(u-boot),"			\
-+					"128k(u-boot-env),"		\
++					"64k(u-boot-env),"		\
++					"64k(boot),"			\
 +					"4096k(kernel),"		\
 +					"128k(script),"			\
 +					"24576k(rootfs),"		\

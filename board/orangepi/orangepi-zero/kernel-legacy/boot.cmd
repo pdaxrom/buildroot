@@ -1,14 +1,10 @@
 sf probe
 mtdparts
-ubi part rootfs
-ubifsmount ubi0:rootfs
-ubifsload ${kernel_addr_r} /boot/zImage
-#ubifsload ${ramdisk_addr_r} initrd
-ubifsload ${fdt_addr_r} /boot/script.bin
-ubifsumount
-ubi detach
 
-setenv rootargs "ubi.mtd=2 root=ubi0:rootfs rootfstype=ubifs rw rootwait"
+sf read ${kernel_addr_r} kernel 0x00400000
+sf read ${fdt_addr_r} script 0x00020000
+
+setenv rootargs "ubi.mtd=6 root=/dev/mtdblock5 rootfstype=squashfs ro rootwait init=/preinit"
 
 #setenv consargs "ignore_loglevel console=ttyS0,115200 console=tty1"
 setenv consargs "ignore_loglevel console=ttyS0,115200"

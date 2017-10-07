@@ -1,6 +1,6 @@
 #!/bin/sh
 
-UBIMTD=/dev/mtd5
+UBIMTD=/dev/mtd6
 UBIPART=/dev/ubi0
 UBIDEV=${UBIPART}_0
 
