@@ -12,3 +12,14 @@ config BR2_PACKAGE_PYLDIN601
 
 comment "pyldin 601 needs a toolchain w/ dynamic library, threads"
 	depends on BR2_STATIC_LIBS || !BR2_TOOLCHAIN_HAS_THREADS
+
+if BR2_PACKAGE_PYLDIN601
+
+config BR2_PACKAGE_PYLDIN601_ALL_FLOPPIES
+	bool "install floppies"
+	depends on !BR2_PACKAGE_PYLDIN601_GAMES
+
+config BR2_PACKAGE_PYLDIN601_GAMES
+	bool "install games floppy"
+
+endif
