@@ -1,7 +1,7 @@
 auto lo
 iface lo inet loopback
 
-auto eth0
+allow-hotplug eth0
 iface eth0 inet dhcp
   pre-up /etc/network/nfs_check
   wait-delay 15
@@ -19,8 +19,11 @@ iface br0 inet static
 #  pre-up brctl addif br0 wlan0
 #  pre-up ifconfig wlan0 up
 # hostapd down and remove network interface from bridge and remove bridge
-   pre-up brctl addif br0 usb0
-   pre-up ifconfig usb0 up
+  pre-up brctl addif br0 usb0
+  pre-up ifconfig usb0 up
+  post-up /etc/init.d/S30otgadget start
+  post-down brctl delif br0 usb0
+  post-down ifconfig usb0 down
   post-down start-stop-daemon -K -q -p /run/hostapd.pid
 #  post-down ifconfig wlan0 down
 #  post-down brctl delif br0 wlan0
@@ -31,3 +34,8 @@ iface wlan0 inet manual
 
 auto usb0
 iface usb0 inet manual
+
+allow-hotplug vpn_vpn0
+iface vpn_vpn0 inet dhcp
+  pre-up /etc/network/softetherd_route up
+  post-down /etc/network/softetherd_route down
