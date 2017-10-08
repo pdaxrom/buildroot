@@ -38,4 +38,6 @@ iface usb0 inet manual
 allow-hotplug vpn_vpn0
 iface vpn_vpn0 inet dhcp
   pre-up /etc/network/softetherd_route up
+  post-up /etc/network/softetherd_dns up
+  pre-down /etc/network/softetherd_dns down
   post-down /etc/network/softetherd_route down

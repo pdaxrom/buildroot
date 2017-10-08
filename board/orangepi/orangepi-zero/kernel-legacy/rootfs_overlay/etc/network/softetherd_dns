@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ "$1" = "up" ]; then
+	if [ ! -e /tmp/resolv.conf.vpn ]; then
+		mv /tmp/resolv.conf /tmp/resolv.conf.vpn
+		grep 'vpn' /tmp/resolv.conf.vpn > /tmp/resolv.conf
+	fi
+elif [ "$1" = "down" ]; then
+	if [ -e /tmp/resolv.conf.vpn ]; then
+		mv /tmp/resolv.conf.vpn /tmp/resolv.conf
+	fi
+fi
+
+exit 0
