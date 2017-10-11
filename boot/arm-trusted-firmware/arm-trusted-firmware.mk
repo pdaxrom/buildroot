@@ -8,7 +8,9 @@ ARM_TRUSTED_FIRMWARE_VERSION = $(call qstrip,$(BR2_TARGET_ARM_TRUSTED_FIRMWARE_V
 ARM_TRUSTED_FIRMWARE_LICENSE = BSD-3-Clause
 ARM_TRUSTED_FIRMWARE_LICENSE_FILES = license.md
 
+ifneq ($(BR2_TARGET_UBOOT_SUNXI64_IMAGE),y)
 ARM_TRUSTED_FIRMWARE_DEPENDENCIES += uboot
+endif
 
 ifeq ($(ARM_TRUSTED_FIRMWARE_VERSION),custom)
 # Handle custom ATF tarballs as specified by the configuration
@@ -39,14 +41,23 @@ ARM_TRUSTED_FIRMWARE_MAKE_OPTS += SCP_BL2=$(BINARIES_DIR)/scp-fw.bin
 ARM_TRUSTED_FIRMWARE_DEPENDENCIES += vexpress-firmware
 endif
 
+ifeq ($(BR2_TARGET_UBOOT_SUNXI64_IMAGE),y)
+define ARM_TRUSTED_FIRMWARE_BUILD_CMDS
+	$(TARGET_CONFIGURE_OPTS) \
+		$(MAKE) -C $(@D) $(ARM_TRUSTED_FIRMWARE_MAKE_OPTS)
+endef
+else
 define ARM_TRUSTED_FIRMWARE_BUILD_CMDS
 	$(TARGET_CONFIGURE_OPTS) \
 		$(MAKE) -C $(@D) $(ARM_TRUSTED_FIRMWARE_MAKE_OPTS) \
 			all fip
 endef
+endif
 
 define ARM_TRUSTED_FIRMWARE_INSTALL_IMAGES_CMDS
-	cp -dpf $(@D)/build/$(ARM_TRUSTED_FIRMWARE_PLATFORM)/release/*.bin $(BINARIES_DIR)/
+	find $(@D)/build/$(ARM_TRUSTED_FIRMWARE_PLATFORM)/ -name '*.bin' -type f -exec cp {} $(BINARIES_DIR)/ \;
+#
+#	cp -dpf $(@D)/build/$(ARM_TRUSTED_FIRMWARE_PLATFORM)/release/*.bin $(BINARIES_DIR)/
 endef
 
 # Configuration ckeck

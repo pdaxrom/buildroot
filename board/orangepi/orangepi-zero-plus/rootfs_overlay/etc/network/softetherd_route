@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if [ "$1" = "up" ]; then
+	for f in $(awk '/string Hostname/ { print $3; }' /var/lib/softether/vpn_client.config); do
+		ip r a $f $(ip r l g | cut -d' ' -f2-)
+	done
+elif [ "$1" = "down" ]; then
+	for f in $(awk '/string Hostname/ { print $3; }' /var/lib/softether/vpn_client.config); do
+		ip r d $f
+	done
+fi
+
+exit 0

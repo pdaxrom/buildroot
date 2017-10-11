@@ -134,6 +134,20 @@ UBOOT_MAKE_OPTS += \
 	HOSTCC="$(HOSTCC) $(HOST_CFLAGS)" \
 	HOSTLDFLAGS="$(HOST_LDFLAGS)"
 
+ifeq ($(BR2_TARGET_UBOOT_SUNXI64_IMAGE),y)
+UBOOT_DEPENDENCIES += arm-trusted-firmware
+UBOOT_MAKE_OPTS += \
+	BL31=$(BINARIES_DIR)/bl31.bin
+
+define UBOOT_GENERATE_SUNXI64_IMAGE
+	cat \
+		$(@D)/spl/sunxi-spl.bin \
+		$(@D)/u-boot.itb \
+		> $(BINARIES_DIR)/u-boot-sunxi-with-spl.bin
+endef
+UBOOT_POST_INSTALL_IMAGES_HOOKS += UBOOT_GENERATE_SUNXI64_IMAGE
+endif
+
 ifeq ($(BR2_TARGET_UBOOT_NEEDS_DTC),y)
 UBOOT_DEPENDENCIES += host-dtc
 endif

@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+
+load_rules()
+{
+	if [ -f /etc/iptables/rules.v4 ]; then
+		iptables-restore < /etc/iptables/rules.v4
+	fi
+	if [ -f /etc/iptables/rules.v6 ]; then
+		ip6tables-restore < /etc/iptables/rules.v6
+	fi
+}
+
+save_rules()
+{
+	iptables-save > /etc/iptables/rules.v4
+	ip6tables-save > /etc/iptables/rules.v6
+}
+
+case "$1" in
+	start)
+		load_rules
+		;;
+	stop)
+		;;
+	restart|reload)
+		;;
+	save)
+		save_rules
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

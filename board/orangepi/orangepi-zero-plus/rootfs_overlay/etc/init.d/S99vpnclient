@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+
+case "$1" in
+	start)
+		/usr/sbin/vpnclient start
+		;;
+	stop)
+		/usr/sbin/vpnclient stop
+		;;
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+esac

@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+
+case "$1" in
+	start)
+		echo 2 > /sys/bus/platform/devices/sunxi_usb_udc/otg_role
+		;;
+	stop)
+		;;
+	restart|reload)
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac

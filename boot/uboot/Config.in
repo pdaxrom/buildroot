@@ -348,6 +348,14 @@ config BR2_TARGET_UBOOT_ZYNQ_IMAGE
 	  for u-boot-dtb.img file so this U-Boot format is required
 	  to be set.
 
+config BR2_TARGET_UBOOT_SUNXI64_IMAGE
+	bool "Generate image for sunxi64"
+	depends on BR2_aarch64
+	depends on BR2_TARGET_UBOOT_SPL
+	help
+	  Generate the BOOT.BIN file from U-Boot's SPL. The image
+	  boots the sunxi 64 chips.
+
 config BR2_TARGET_UBOOT_ALTERA_SOCFPGA_IMAGE_CRC
 	bool "CRC image for Altera SoC FPGA (mkpimage)"
 	depends on BR2_arm
