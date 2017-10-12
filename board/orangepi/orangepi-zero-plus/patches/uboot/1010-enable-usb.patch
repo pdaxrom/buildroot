@@ -1,0 +1,18 @@
+--- uboot-2017.09/arch/arm/dts/sun50i-h5-orangepi-zero-plus2.dts-	2017-10-12 21:31:19.738998959 +0400
++++ uboot-2017.09/arch/arm/dts/sun50i-h5-orangepi-zero-plus2.dts	2017-10-12 21:30:12.396808894 +0400
+@@ -109,3 +109,15 @@
+ 	pinctrl-0 = <&uart0_pins_a>;
+ 	status = "okay";
+ };
++
++&usbphy {
++	status = "okay";
++};
++
++&ohci1 {
++	status = "okay";
++};
++
++&ehci1 {
++	status = "okay";
++};
