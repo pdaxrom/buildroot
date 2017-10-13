@@ -1,0 +1,18 @@
+--- linux-master/arch/arm64/kernel/debug-monitors.c-	2017-10-12 10:40:15.827490196 +0400
++++ linux-master/arch/arm64/kernel/debug-monitors.c	2017-10-12 10:40:43.584362432 +0400
+@@ -320,6 +320,7 @@
+ 	return 0;
+ }
+ 
++#ifdef CONFIG_COMPAT
+ int aarch32_break_handler(struct pt_regs *regs)
+ {
+ 	siginfo_t info;
+@@ -359,6 +360,7 @@
+ 	force_sig_info(SIGTRAP, &info, current);
+ 	return 0;
+ }
++#endif
+ 
+ static int __init debug_traps_init(void)
+ {
