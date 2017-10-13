@@ -1,0 +1,229 @@
+diff -Nur uboot-2017.09/arch/arm/include/asm/arch-sunxi/tve.h uboot-2017.09-new/arch/arm/include/asm/arch-sunxi/tve.h
+--- uboot-2017.09/arch/arm/include/asm/arch-sunxi/tve.h	2017-09-11 22:10:40.000000000 +0400
++++ uboot-2017.09-new/arch/arm/include/asm/arch-sunxi/tve.h	2017-10-10 22:41:58.000000000 +0400
+@@ -45,7 +45,9 @@
+ 	u32 csc_reg1;			/* 0x044 */
+ 	u32 csc_reg2;			/* 0x048 */
+ 	u32 csc_reg3;			/* 0x04c */
+-	u8 res1[0xb0];			/* 0x050 */
++	u8 res1[0xa8];			/* 0x050 */
++	u32 auto_detect_cfg0;		/* 0x0f8 */
++	u32 auto_detect_cfg1;		/* 0x0fc */
+ 	u32 color_burst;		/* 0x100 */
+ 	u32 vsync_num;			/* 0x104 */
+ 	u32 notch_freq;			/* 0x108 */
+@@ -62,6 +64,10 @@
+ 	u32 slave_para;			/* 0x134 */
+ 	u32 cfg1;			/* 0x138 */
+ 	u32 cfg2;			/* 0x13c */
++	u8 res2[0x1c4];			/* 0x140 */
++	u32 calibration;		/* 0x304 */
++	u8 res3[0x4];			/* 0x308 */
++	u32 unknown3;			/* 0x30c */
+ };
+ 
+ /*
+@@ -79,12 +85,14 @@
+ #define SUNXI_TVE_CFG0_PAL			0x07030001
+ #define SUNXI_TVE_CFG0_NTSC			0x07030000
+ #define SUNXI_TVE_DAC_CFG0_VGA			0x403e1ac7
+-#ifdef CONFIG_MACH_SUN5I
++#if defined(CONFIG_MACH_SUN5I) || defined(CONFIG_MACH_SUNXI_H3_H5)
+ #define SUNXI_TVE_DAC_CFG0_COMPOSITE		0x433f0009
+ #else
+ #define SUNXI_TVE_DAC_CFG0_COMPOSITE		0x403f0008
+ #endif
++#define SUNXI_TVE_DAC_CFG0_DETECTION		0x433f0289
+ #define SUNXI_TVE_FILTER_COMPOSITE		0x00000120
++#define SUNXI_TVE_CHROMA_FREQ_PAL		0x2a098acb
+ #define SUNXI_TVE_CHROMA_FREQ_PAL_M		0x21e6efe3
+ #define SUNXI_TVE_CHROMA_FREQ_PAL_NC		0x21f69446
+ #define SUNXI_TVE_PORCH_NUM_PAL			0x008a0018
+@@ -105,6 +113,8 @@
+ #define SUNXI_TVE_AUTO_DETECT_STATUS_SHORT_GND	3
+ #define SUNXI_TVE_AUTO_DETECT_DEBOUNCE_SHIFT(d)	((d) * 8)
+ #define SUNXI_TVE_AUTO_DETECT_DEBOUNCE_MASK(d)	(0xf << ((d) * 8))
++#define SUNXI_TVE_AUTO_DETECT_CFG0		0x00000280
++#define SUNXI_TVE_AUTO_DETECT_CFG1		0x028F00FF
+ #define SUNXI_TVE_CSC_REG0_ENABLE		(1 << 31)
+ #define SUNXI_TVE_CSC_REG0			0x08440832
+ #define SUNXI_TVE_CSC_REG1			0x3b6dace1
+@@ -124,6 +134,9 @@
+ #define SUNXI_TVE_RESYNC_NUM_PAL		0x800d000c
+ #define SUNXI_TVE_RESYNC_NUM_NTSC		0x000e000c
+ #define SUNXI_TVE_SLAVE_PARA_COMPOSITE		0x00000000
++#define SUNXI_TVE_CALIBRATION_H3		0x02000c00
++#define SUNXI_TVE_CALIBRATION_H5		0x02850000
++#define SUNXI_TVE_UNKNOWN3_H5			0x00101110
+ 
+ void tvencoder_mode_set(struct sunxi_tve_reg * const tve, enum tve_mode mode);
+ void tvencoder_enable(struct sunxi_tve_reg * const tve);
+diff -Nur uboot-2017.09/drivers/video/sunxi/Makefile uboot-2017.09-new/drivers/video/sunxi/Makefile
+--- uboot-2017.09/drivers/video/sunxi/Makefile	2017-09-11 22:10:40.000000000 +0400
++++ uboot-2017.09-new/drivers/video/sunxi/Makefile	2017-10-10 22:41:58.000000000 +0400
+@@ -6,4 +6,4 @@
+ #
+ 
+ obj-$(CONFIG_VIDEO_SUNXI) += sunxi_display.o lcdc.o tve_common.o ../videomodes.o
+-obj-$(CONFIG_VIDEO_DE2) += sunxi_de2.o sunxi_dw_hdmi.o lcdc.o ../dw_hdmi.o
++obj-$(CONFIG_VIDEO_DE2) += sunxi_de2.o sunxi_dw_hdmi.o sunxi_tve.o lcdc.o tve_common.o ../dw_hdmi.o
+diff -Nur uboot-2017.09/drivers/video/sunxi/sunxi_tve.c uboot-2017.09-new/drivers/video/sunxi/sunxi_tve.c
+--- uboot-2017.09/drivers/video/sunxi/sunxi_tve.c	1970-01-01 04:00:00.000000000 +0400
++++ uboot-2017.09-new/drivers/video/sunxi/sunxi_tve.c	2017-10-10 22:41:58.000000000 +0400
+@@ -0,0 +1,156 @@
++/*
++ * Allwinner TVE driver
++ *
++ * (C) Copyright 2017 Jernej Skrabec <jernej.skrabec@siol.net>
++ *
++ * SPDX-License-Identifier:	GPL-2.0+
++ */
++
++#include <common.h>
++#include <display.h>
++#include <dm.h>
++#include <asm/io.h>
++#include <asm/arch/clock.h>
++#include <asm/arch/lcdc.h>
++#include <asm/arch/tve.h>
++
++static int sunxi_tve_get_plug_in_status(void)
++{
++	struct sunxi_tve_reg * const tve =
++		(struct sunxi_tve_reg *)SUNXI_TVE0_BASE;
++	u32 status;
++
++	status = readl(&tve->auto_detect_status) &
++		SUNXI_TVE_AUTO_DETECT_STATUS_MASK(0);
++
++	return status == SUNXI_TVE_AUTO_DETECT_STATUS_CONNECTED;
++}
++
++static int sunxi_tve_wait_for_hpd(void)
++{
++	struct sunxi_tve_reg * const tve =
++		(struct sunxi_tve_reg *)SUNXI_TVE0_BASE;
++	ulong start;
++
++	/* enable auto detection */
++	writel(SUNXI_TVE_DAC_CFG0_DETECTION, &tve->dac_cfg0);
++	writel(SUNXI_TVE_AUTO_DETECT_CFG0, &tve->auto_detect_cfg0);
++	writel(SUNXI_TVE_AUTO_DETECT_CFG1, &tve->auto_detect_cfg1);
++	writel(9 << SUNXI_TVE_AUTO_DETECT_DEBOUNCE_SHIFT(0),
++	       &tve->auto_detect_debounce);
++	writel(SUNXI_TVE_AUTO_DETECT_EN_DET_EN(0), &tve->auto_detect_en);
++
++	start = get_timer(0);
++	do {
++		if (sunxi_tve_get_plug_in_status())
++			return 0;
++		udelay(100);
++	} while (get_timer(start) < 300);
++
++	return -1;
++}
++
++static void sunxi_tve_lcdc_init(const struct display_timing *edid, int bpp)
++{
++	struct sunxi_ccm_reg * const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++	struct sunxi_lcdc_reg * const lcdc =
++		(struct sunxi_lcdc_reg *)SUNXI_LCD1_BASE;
++
++	/* Reset off */
++	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_LCD1);
++
++	/* Clock on */
++	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_LCD1);
++
++	lcdc_init(lcdc);
++	lcdc_tcon1_mode_set(lcdc, edid, false, true);
++	lcdc_enable(lcdc, bpp);
++}
++
++static int sunxi_tve_read_timing(struct udevice *dev,
++				 struct display_timing *timing)
++{
++	/* PAL resolution */
++	timing->pixelclock.typ = 27000000;
++
++	timing->hactive.typ = 720;
++	timing->hfront_porch.typ = 5;
++	timing->hback_porch.typ = 137;
++	timing->hsync_len.typ = 2;
++
++	timing->vactive.typ = 576;
++	timing->vfront_porch.typ = 27;
++	timing->vback_porch.typ = 20;
++	timing->vsync_len.typ = 2;
++
++	timing->flags = DISPLAY_FLAGS_INTERLACED;
++
++	return 0;
++}
++
++static int sunxi_tve_enable(struct udevice *dev, int panel_bpp,
++			    const struct display_timing *edid)
++{
++	struct sunxi_tve_reg * const tve =
++		(struct sunxi_tve_reg *)SUNXI_TVE0_BASE;
++
++	sunxi_tve_lcdc_init(edid, panel_bpp);
++
++	tvencoder_mode_set(tve, tve_mode_composite_pal);
++	tvencoder_enable(tve);
++
++	return 0;
++}
++
++static int sunxi_tve_probe(struct udevice *dev)
++{
++	struct sunxi_ccm_reg * const ccm =
++		(struct sunxi_ccm_reg *)SUNXI_CCM_BASE;
++	struct sunxi_tve_reg * const tve =
++		(struct sunxi_tve_reg *)SUNXI_TVE0_BASE;
++	int ret;
++
++	/* make sure that clock is active */
++	clock_set_pll10(432000000);
++
++	/* Reset off */
++	setbits_le32(&ccm->ahb_reset1_cfg, 1 << AHB_RESET_OFFSET_TVE);
++
++	/* Clock on */
++	setbits_le32(&ccm->ahb_gate1, 1 << AHB_GATE_OFFSET_TVE);
++	writel(CCM_TVE_CTRL_GATE | CCM_TVE_CTRL_M(2), &ccm->tve_clk_cfg);
++
++#ifdef CONFIG_MACH_SUN50I_H5
++	writel(SUNXI_TVE_CALIBRATION_H5, &tve->calibration);
++	writel(SUNXI_TVE_UNKNOWN3_H5, &tve->unknown3);
++#else
++	writel(SUNXI_TVE_CALIBRATION_H3, &tve->calibration);
++#endif
++
++	ret = sunxi_tve_wait_for_hpd();
++	if (ret < 0) {
++		debug("tve can not get hpd signal\n");
++		return -1;
++	}
++
++	return 0;
++}
++
++static const struct dm_display_ops sunxi_tve_ops = {
++	.read_timing = sunxi_tve_read_timing,
++	.enable = sunxi_tve_enable,
++};
++
++U_BOOT_DRIVER(sunxi_tve) = {
++	.name	= "sunxi_tve",
++	.id	= UCLASS_DISPLAY,
++	.ops	= &sunxi_tve_ops,
++	.probe	= sunxi_tve_probe,
++};
++
++#ifdef CONFIG_MACH_SUNXI_H3_H5
++U_BOOT_DEVICE(sunxi_tve) = {
++	.name = "sunxi_tve"
++};
++#endif
