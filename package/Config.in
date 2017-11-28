@@ -1732,6 +1732,7 @@ endif
 	source "package/phytool/Config.in"
 	source "package/pound/Config.in"
 	source "package/pppd/Config.in"
+	source "package/pptpd/Config.in"
 	source "package/pptp-linux/Config.in"
 	source "package/privoxy/Config.in"
 	source "package/proftpd/Config.in"

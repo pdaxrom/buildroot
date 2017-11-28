@@ -1,0 +1,26 @@
+#!/bin/sh
+
+[ -x /usr/sbin/pptpd ] || exit 0
+[ -f /etc/pptpd.conf ] || exit 0
+
+case "$1" in
+	start)
+		printf "Starting pptpd: "
+		start-stop-daemon -S -x /usr/sbin/pptpd
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	stop)
+		printf "Stopping pptpd: "
+		start-stop-daemon -K -q -x /usr/sbin/pptpd
+		[ $? = 0 ] && echo "OK" || echo "FAIL"
+		;;
+	restart|reload)
+		$0 stop
+		$0 start
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit 0

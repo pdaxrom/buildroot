@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PPTPD
+	bool "pptpd"
+	select BR2_PACKAGE_PPPD
+	help
+	  PopTop pptp server
+
+	  http://poptop.sourceforge.net/
