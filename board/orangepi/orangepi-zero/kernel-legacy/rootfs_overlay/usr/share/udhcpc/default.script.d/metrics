@@ -1,0 +1,23 @@
+#!/bin/sh
+
+[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+
+METRICS_CONF="/etc/network/metrics"
+
+[ -e $METRICS_CONF ] || exit 0
+[ -x /usr/sbin/ifmetric ] || exit 0
+
+get_metric() {
+	local val=$(awk '/^'$1' / { print $2; }' $METRICS_CONF)
+	if [ "$val" = "" ]; then
+		val="0"
+	fi
+	echo $val
+}
+
+case "$1" in
+	renew|bound)
+		metric=$(get_metric $interface)
+		ifmetric $interface $metric
+		;;
+esac
