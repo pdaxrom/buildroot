@@ -3,10 +3,14 @@
 
 case "$1" in
 	start)
-		/usr/sbin/vpnclient start
+		if [ -x /usr/sbin/vpnclient ]; then
+		    /usr/sbin/vpnclient start
+		fi
 		;;
 	stop)
-		/usr/sbin/vpnclient stop
+		if [ -x /usr/sbin/vpnclient ]; then
+		    /usr/sbin/vpnclient stop
+		fi
 		;;
 	*)
 		echo "Usage: $0 {start|stop}"

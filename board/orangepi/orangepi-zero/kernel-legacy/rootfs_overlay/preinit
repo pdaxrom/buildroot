@@ -5,9 +5,15 @@ UBIPART=/dev/ubi0
 UBIDEV=${UBIPART}_0
 
 if [ ! -e $UBIDEV ]; then
+    mount /proc
+    mount /sys
+    if [ ! -e $UBIPART ]; then
 	ubiformat $UBIMTD
 	ubiattach -p $UBIMTD
-	ubimkvol $UBIPART -m -N overlay
+    fi
+    ubimkvol $UBIPART -m -N overlay
+    umount /sys
+    umount /proc
 fi
 
 mount -t ubifs $UBIDEV /overlay

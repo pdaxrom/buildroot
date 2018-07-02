@@ -1,2 +1,2 @@
-ACTION=="add",SUBSYSTEM=="usb"    RUN+="/usr/sbin/usbip bind -b $kernel"
-ACTION=="remove",SUBSYSTEM=="usb" RUN+="/usr/sbin/usbip unbind -b $kernel"
+ENV{DEVTYPE}=="usb_device",ACTION=="add",SUBSYSTEM=="usb"    RUN+="/usr/sbin/usbip bind -b $kernel"
+ENV{DEVTYPE}=="usb_device",ACTION=="remove",SUBSYSTEM=="usb" RUN+="/usr/sbin/usbip unbind -b $kernel"

@@ -23,8 +23,8 @@ cp $1 $UPDATE_ROOT
 
 cat > ${UPDATE_ROOT}/update-rootfs << EOF
 #!/bin/sh
-#ubiformat /dev/mtd2 -f rootfs.ubi
 flashcp -v rootfs.squashfs /dev/mtd5
+ubiformat /dev/mtd6 -y
 sync
 reboot -f
 EOF
@@ -32,6 +32,7 @@ EOF
 chmod 755 ${UPDATE_ROOT}/update-rootfs
 
 mount -o remount,ro /
+mount -o remount,ro /dev/ubi0_0
 
 echo "done"
 echo "Write system image..."
