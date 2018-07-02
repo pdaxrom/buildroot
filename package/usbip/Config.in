@@ -1,0 +1,18 @@
+# Prompt in the linux-tools package
+# Here only for the menuconfig; it's a real package
+config BR2_PACKAGE_USBIP
+	bool"usbip"
+	select BR2_PACKAGE_LIBSYSFS
+	help
+	  usbip is a set of tools that allows machines to share their
+	  usb devices over the network, to be driven by a remote client.
+
+if BR2_PACKAGE_USBIP
+
+config BR2_PACKAGE_USBIP_3_16_OR_EARLIER
+	bool "use old directory path for usbip (Linux kernel <= 3.16)"
+
+config BR2_PACKAGE_USBIP_BIND_ALL
+	bool "bind all usb devices"
+
+endif

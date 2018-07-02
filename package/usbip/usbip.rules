@@ -1,0 +1,2 @@
+ACTION=="add",SUBSYSTEM=="usb"    RUN+="/usr/sbin/usbip bind -b $kernel"
+ACTION=="remove",SUBSYSTEM=="usb" RUN+="/usr/sbin/usbip unbind -b $kernel"

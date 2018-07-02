@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+
+case "$1" in
+	start)
+		if [ -x /usr/sbin/usbipd ]; then
+		    modprobe usbip-core
+		    modprobe usbip-host
+		    /usr/sbin/usbipd -D
+		fi
+		;;
+	stop)
+		if [ -x /usr/sbin/usbipd ]; then
+		    killall usbipd
+		fi
+		;;
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+esac

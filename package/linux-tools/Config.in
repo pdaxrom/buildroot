@@ -85,4 +85,6 @@ config BR2_PACKAGE_LINUX_TOOLS_TMON
 	  tmon is a terminal-based tool (using curses) that allows the
 	  user to access thermal information about the system.
 
+source package/usbip/Config.in
+
 endmenu
