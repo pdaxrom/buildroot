@@ -9,7 +9,7 @@ setenv rootargs "ubi.mtd=6 root=/dev/mtdblock5 rootfstype=squashfs ro rootwait i
 #setenv consargs "ignore_loglevel console=ttyS0,115200 console=tty1"
 setenv consargs "ignore_loglevel console=ttyS0,115200"
 
-setenv bootargs "${mtdparts} ${rootargs} ${consargs} cgroup_enable=memory swapaccount=1 hdmi.audio=EDID:0 disp.screen0_output_mode=1920x1080p60 consoleblank=0 enforcing=0 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16"
+setenv bootargs "${mtdparts} ${rootargs} ${consargs} cgroup_enable=memory swapaccount=1 hdmi.audio=EDID:0 disp.screen0_output_mode=1280x720p60 consoleblank=0 enforcing=0 sunxi_ve_mem_reserve=0 sunxi_g2d_mem_reserve=0 sunxi_fb_mem_reserve=16 fbcon=font:10x18"
 
 setenv machid 1029
 setenv bootm_boot_mode sec
